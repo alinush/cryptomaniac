@@ -5,7 +5,8 @@ CryptoManiac is a simple command line utility that encrypts a file using AES-256
 
 I wrote this program for fun, mostly while waiting for my laundry during a few really hot summer nights in Brooklyn.
 
-Enjoy!
+Enjoy! 
+http://alinush.is-great.org
 
 To build:
 =========

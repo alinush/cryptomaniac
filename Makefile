@@ -1,4 +1,4 @@
 all:
-	gcc cryptomaniac.c -lcrypto -std=gnu99 -o cryptomaniac
+	gcc -Wall -Wextra -Werror cryptomaniac.c -lcrypto -std=gnu99 -o cryptomaniac
 clean:
 	rm cryptomaniac

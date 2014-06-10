@@ -49,6 +49,9 @@
 #define AES_ERR_CIPHER_FINAL -4
 #define AES_ERR_IO -5
 
+#define KEY_SIZE_BYTES 32
+#define IV_SIZE_BYTES 16
+
 #define BUF_SIZE (1024*1024)
 
 typedef struct __cryptomaniac_t {
@@ -249,6 +252,17 @@ int parse_arguments(int argc, char * argv[], cryptomaniac_t * cm)
 			cm->encrypt = 0;
 		} else if(!strcmp(argv[i], "-k")) {
 			if(i < argc - 1) {
+                int keyLen = strlen(argv[i + 1]);
+                if(keyLen % 2 == 1) {
+                    fprintf(stderr, "ERROR: You need an even number of hex digits in your AES key\n");
+                    goto cleanup;
+                }
+
+                if(keyLen != KEY_SIZE_BYTES * 2) {
+                    fprintf(stderr, "ERROR: Expected %d-bit AES key. You provided a %d-bit key.\n", KEY_SIZE_BYTES * 8, keyLen / 2 * 8);
+                    goto cleanup;
+                }
+
 				int st = hex2bin(argv[i + 1], cm->key, EVP_MAX_KEY_LENGTH);
 				if(st <= 0)
 					goto cleanup;
@@ -260,6 +274,17 @@ int parse_arguments(int argc, char * argv[], cryptomaniac_t * cm)
 			}
 		} else if(!strcmp(argv[i], "-i")) {
 			if(i < argc - 1) {
+                int ivLen = strlen(argv[i + 1]);
+                if(ivLen % 2 == 1) {
+                    fprintf(stderr, "ERROR: You need an even number of hex digits in your AES initialization vector (IV)\n");
+                    goto cleanup;
+                }
+
+                if(ivLen != IV_SIZE_BYTES * 2) {
+                    fprintf(stderr, "ERROR: Expected %d-bit AES initialization vector (IV). You provided a %d-bit one.\n", IV_SIZE_BYTES * 8, ivLen / 2 * 8);
+                    goto cleanup;
+                }
+
 				int st = hex2bin(argv[i + 1], cm->iv, EVP_MAX_IV_LENGTH);
 				if(st <= 0)
 					goto cleanup;
@@ -311,34 +336,34 @@ cleanup:
 
 void print_usage(FILE * out, const char * name)
 {
-	fprintf(stderr, "Usage: %s <infile> <outfile> <options>\n", name);
+	fprintf(out, "Usage: %s <infile> <outfile> <options>\n", name);
 	
-	fprintf(stderr, "Cryptomaniac command-line client, version 0.1, by Alin Tomescu, http://alinush.is-great.org/\n");
-	fprintf(stderr, "Encrypt or decrypt a file using AES256 in CBC or CTR mode. ");
-	fprintf(stderr, "You have to provide your own key (32 bytes) and IV (16 bytes) as hexadecimal strings.\n");
-	fprintf(stderr, "\n");
+	fprintf(out, "Cryptomaniac command-line client, version 0.1, by Alin Tomescu, http://alinush.is-great.org/\n");
+	fprintf(out, "Encrypt or decrypt a file using AES256 in CBC or CTR mode. ");
+	fprintf(out, "You have to provide your own key (32 bytes) and IV (16 bytes) as hexadecimal strings.\n");
+	fprintf(out, "\n");
 	
-	fprintf(stderr, "  <infile> is the input file to encrypt or decrypt\n");
-	fprintf(stderr, "  <outfile> is the output file where the encrypted or decrypted bytes will be written to\n");
-	fprintf(stderr, "  <options> can be anyone of the following:\n");
-	fprintf(stderr, "    -e encrypts the infile, stores the result in the outfile\n");
-	fprintf(stderr, "    -d decrypts the infile, stores the result in the outfile\n");
-	fprintf(stderr, "    -k <key> the encryption key to use as a hex string (32 bytes)\n");
-	fprintf(stderr, "    -i <iv> the IV to use as a hex string (16 bytes)\n");
-	fprintf(stderr, "    -m <mode> the cipher block-mode to use (this can be cbc or ctr)\n");
-	fprintf(stderr, "\n");
+	fprintf(out, "  <infile> is the input file to encrypt or decrypt\n");
+	fprintf(out, "  <outfile> is the output file where the encrypted or decrypted bytes will be written to\n");
+	fprintf(out, "  <options> can be anyone of the following:\n");
+	fprintf(out, "    -e encrypts the infile, stores the result in the outfile\n");
+	fprintf(out, "    -d decrypts the infile, stores the result in the outfile\n");
+	fprintf(out, "    -k <key> the encryption key to use as a hex string (32 bytes)\n");
+	fprintf(out, "    -i <iv> the IV to use as a hex string (16 bytes)\n");
+	fprintf(out, "    -m <mode> the cipher block-mode to use (this can be cbc or ctr)\n");
+	fprintf(out, "\n");
 	
-	fprintf(stderr, "Examples:\n");
-	fprintf(stderr, "=========\n");
-	fprintf(stderr, "\n");
+	fprintf(out, "Examples:\n");
+	fprintf(out, "=========\n");
+	fprintf(out, "\n");
 	
-	fprintf(stderr, "  Encrypting a file:\n");
-	fprintf(stderr, "  ------------------\n");
-	fprintf(stderr, "  %s secrets.txt secrets.safe -e -k ae48fbc31957 -iv 39eab239867dfe\n", name);
-	fprintf(stderr, "\n");
+	fprintf(out, "  Encrypting a file:\n");
+	fprintf(out, "  ------------------\n");
+	fprintf(out, "  %s secrets.txt secrets.safe -e -k ae48fbc31957 -iv 39eab239867dfe\n", name);
+	fprintf(out, "\n");
 	
-	fprintf(stderr, "  Decrypting a file:\n");
-	fprintf(stderr, "  ------------------\n");
-	fprintf(stderr, "  %s secretes.safe secrets.revealed -d -k ae48fbc31957 -iv 39eab239867dfe\n", name);
-	fprintf(stderr, "\n");
+	fprintf(out, "  Decrypting a file:\n");
+	fprintf(out, "  ------------------\n");
+	fprintf(out, "  %s secretes.safe secrets.revealed -d -k ae48fbc31957 -iv 39eab239867dfe\n", name);
+	fprintf(out, "\n");
 }

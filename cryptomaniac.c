@@ -243,6 +243,7 @@ int parse_arguments(int argc, char * argv[], cryptomaniac_t * cm)
 	cm->infile = argv[1];
 	cm->outfile = argv[2];	
 	cm->mode = EVP_get_cipherbyname(AES_DEFAULT_MODE);
+	cm->encrypt = 1;
 	
 	for(int i = 3; i < argc; i++)
 	{
